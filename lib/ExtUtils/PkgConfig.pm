@@ -23,7 +23,7 @@ use Carp;
 
 use vars qw/ $VERSION $AUTOLOAD/;
 
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 sub import {
 	my $class = shift;
@@ -100,7 +100,6 @@ sub find {
 		}
 	}
 
-	print STDERR "found package \"$pkg\", using it\n";
 	$data{pkg} = $pkg;
 	foreach my $what (qw/modversion cflags libs/) {
 		$data{$what} = `pkg-config --$what \"$pkg\"`;
