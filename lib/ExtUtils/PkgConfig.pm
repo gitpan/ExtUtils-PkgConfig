@@ -21,9 +21,50 @@ package ExtUtils::PkgConfig;
 use strict;
 use Carp;
 
-use vars qw/ $VERSION /;
+use vars qw/ $VERSION $AUTOLOAD/;
 
-$VERSION = '1.00';
+$VERSION = '1.02';
+
+sub AUTOLOAD 
+{
+	my $class = shift;
+	my $modulename = shift;
+	my $function = $AUTOLOAD;
+	$function =~ s/.*://;
+	$function =~ s/_/-/g;
+
+	my $ans = undef;
+	my $arg = shift;
+	if (grep {$_ eq $function} qw/libs modversion cflags 
+				      libs-only-L libs-only-l/)
+	{
+		# simple
+		$ans = `pkg-config --$function \"$modulename\"`;
+	}
+	elsif ( 'variable' eq $function )
+	{
+		# variable
+		$ans = `pkg-config --${function}=$arg \"$modulename\"`;
+	}
+	elsif (grep {$_ eq $function} qw/atleast-version exact-version 
+					 max-version/)
+	{
+		# boolean
+		$ans = not system (
+			"pkg-config --${function}=$arg \"$modulename\"");
+	}
+	else
+	{
+		croak "method '$function' not implemented";
+		$ans = '';
+	}
+
+	chomp($ans);
+	$ans = undef if $ans eq '';
+
+	return $ans;
+}
+
 
 sub find {
 	my $class = shift;
@@ -33,12 +74,12 @@ sub find {
 
 	# try as many pkg parameters are there are arguments left on stack
 	while( $pkg and 
-	       system "pkg-config \"$pkg\" --exists --silence-errors" )
+	       system "pkg-config --exists --silence-errors \"$pkg\"" )
 	{
 		push @pkgs, $pkg;
 		$pkg = shift;
 	}
-	
+
 	unless( $pkg )
 	{
 		if( @pkgs > 1 )
@@ -52,13 +93,11 @@ sub find {
 			    . "*** check that it is properly installed and available in PKG_CONFIG_PATH\n";
 		}
 	}
-	else
-	{
-		print "found package \"$pkg\", using it\n";
-	}
 
+	print "found package \"$pkg\", using it\n";
+	$data{pkg} = $pkg;
 	foreach my $what (qw/modversion cflags libs/) {
-		$data{$what} = `pkg-config \"$pkg\" --$what`;
+		$data{$what} = `pkg-config --$what \"$pkg\"`;
                 $data{$what} =~ s/[\015\012]+$//;
 		croak "*** can't find $what for \"$pkg\"\n"
 		    . "*** is it properly installed and available in PKG_CONFIG_PATH?\n"
@@ -83,6 +122,30 @@ ExtUtils::PkgConfig - simplistic interface to pkg-config
  print "modversion:  $pkg_info{modversion}\n";
  print "cflags:      $pkg_info{cflags}\n";
  print "libs:        $pkg_info{libs}\n";
+
+ $modversion = ExtUtils::PkgConfig->modversion($package);
+
+ $libs = ExtUtils::PkgConfig->libs($package);
+
+ $cflags = ExtUtils::PkgConfig->cflags($package);
+
+ $lib_only_L = ExtUtils::PkgConfig->libs_only_L($package);
+
+ $lib_only_l = ExtUtils::PkgConfig->libs_only_l($package);
+
+ $var_value = ExtUtils::PkgConfig->variable($package,$var);
+
+ if (ExtUtils::PkgConfig->atleast_version($package,$version)) {
+    ...
+ }
+
+ if (ExtUtils::PkgConfig->exact_version($package,$version)) {
+    ...
+ }
+
+ if (ExtUtils::PkgConfig->max_version($package,$version)) {
+    ...
+ }
 
 =head1 DESCRIPTION
 
