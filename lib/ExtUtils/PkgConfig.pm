@@ -23,7 +23,7 @@ use Carp;
 
 use vars qw/ $VERSION $AUTOLOAD/;
 
-$VERSION = '1.07';
+$VERSION = '1.08';
 
 sub import {
 	my $class = shift;
@@ -80,7 +80,7 @@ sub find {
 
 	# try as many pkg parameters are there are arguments left on stack
 	while( $pkg and 
-	       system "pkg-config --exists --silence-errors \"$pkg\"" )
+	       system "pkg-config --exists --print-errors \"$pkg\"" )
 	{
 		push @pkgs, $pkg;
 		$pkg = shift;
@@ -121,6 +121,17 @@ sub create_version_macros {
 			my @modversion = split /\./, $data{modversion};
 			$modversion[2] = 0 unless defined $modversion[2];
 
+			# If a version part contains non-numeric characters,
+			# see if it at least starts with numbers and use those.
+			# This is needed for versions like '2.0b2'.
+			# foreach ( @modversion ) {
+			# 	if (/\D/ && /^(\d+)/) {
+			# 		$_ = $1;
+			# 	}
+			# }
+			@modversion =
+				map { /\D/ && /^(\d+)/ ? $1 : $_ } @modversion;
+
 			return <<__EOD__;
 #define $stem\_MAJOR_VERSION ($modversion[0])
 #define $stem\_MINOR_VERSION ($modversion[1])
@@ -133,7 +144,7 @@ __EOD__
 		}
 	}
 
-	return;
+	return undef;
 }
 
 sub write_version_macros {
