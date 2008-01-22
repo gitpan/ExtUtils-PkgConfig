@@ -1,12 +1,14 @@
 #
-# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/4.t,v 1.1 2006/09/24 20:33:50 kaffeetisch Exp $
+# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/4.t,v 1.3 2008/01/20 21:05:17 kaffeetisch Exp $
 #
 
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More tests => 22;
 use ExtUtils::PkgConfig;
+
+require 't/swallow_stderr.inc';
 
 $ENV{PKG_CONFIG_PATH} = './t/';
 
@@ -30,8 +32,12 @@ ok (contains ($macros, 'TEST_MINOR_VERSION (0)'));
 ok (contains ($macros, 'TEST_MICRO_VERSION (4)'));
 ok (contains ($macros, 'TEST_CHECK_VERSION'));
 
-eval { $macros = ExtUtils::PkgConfig->create_version_macros (qw/__bad__/, 'BAD'); };
-ok ($@);
+swallow_stderr (sub {
+	eval {
+		ExtUtils::PkgConfig->create_version_macros (qw/__bad__/, 'BAD');
+	};
+	ok ($@);
+});
 
 my $header = 'eupc_test_tmp.h';
 
@@ -54,15 +60,15 @@ ok (contains ($macros, 'TEST_CHECK_VERSION'));
 ok (close $fh);
 ok (unlink $header);
 
-eval {
-  ExtUtils::PkgConfig->write_version_macros (
-	$header,
-	'__bad__' => 'BAD');
-};
-ok ($@);
+swallow_stderr (sub {
+	eval {
+	  ExtUtils::PkgConfig->write_version_macros (
+		$header,
+		'__bad__' => 'BAD');
+	};
+	ok ($@);
+});
 
-# I'd expect this ...
-# ok (not -f $header);
-
-# ... but the implementation doesn't do it.  Who's correct?
-ok (unlink $header);
+if (-f $header) {
+	unlink $header;
+}

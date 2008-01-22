@@ -20,10 +20,11 @@ package ExtUtils::PkgConfig;
 
 use strict;
 use Carp;
+use English qw(-no_match_vars); # avoid regex performance penalty
 
 use vars qw/ $VERSION $AUTOLOAD/;
 
-$VERSION = '1.08';
+$VERSION = '1.09';
 
 sub import {
 	my $class = shift;
@@ -42,19 +43,30 @@ sub AUTOLOAD
 
 	my $ans = undef;
 	my $arg = shift;
-	if (grep {$_ eq $function} qw/libs modversion cflags 
-				      libs-only-L libs-only-l/)
+	if (grep {$_ eq $function} qw/libs
+	                              modversion
+	                              cflags
+	                              cflags-only-I
+	                              cflags-only-other
+	                              libs-only-L
+	                              libs-only-l
+	                              libs-only-other/)
 	{
 		# simple
 		$ans = `pkg-config --$function \"$modulename\"`;
 	}
-	elsif ( 'variable' eq $function )
+	elsif ('static-libs' eq $function)
+	{
+		$ans = `pkg-config --libs --static \"$modulename\"`;
+	}
+	elsif ('variable' eq $function)
 	{
 		# variable
 		$ans = `pkg-config --${function}=$arg \"$modulename\"`;
 	}
-	elsif (grep {$_ eq $function} qw/atleast-version exact-version 
-					 max-version/)
+	elsif (grep {$_ eq $function} qw/atleast-version
+	                                 exact-version
+	                                 max-version/)
 	{
 		# boolean
 		$ans = not system (
@@ -73,38 +85,49 @@ sub AUTOLOAD
 }
 
 sub find {
-	my $class = shift;
-	my $pkg = shift;
-	my %data = ();
-	my @pkgs;
+	my ($class, @pkg_candidates) = @_;
+	my (@pkgs_found, @error_messages);
 
-	# try as many pkg parameters are there are arguments left on stack
-	while( $pkg and 
-	       system "pkg-config --exists --print-errors \"$pkg\"" )
+	# try all package candidates and save all those that pkg-config
+	# recognizes
+	foreach my $candidate (@pkg_candidates)
 	{
-		push @pkgs, $pkg;
-		$pkg = shift;
+		my $output = qx/pkg-config --exists --print-errors "$candidate" 2>&1/;
+		if (0 == $CHILD_ERROR) {
+			push @pkgs_found, $candidate;
+		}
+		else
+		{
+			push @error_messages, $output;
+		}
 	}
 
-	unless( $pkg )
+	if (0 == scalar @pkgs_found)
 	{
-		if( @pkgs > 1 )
+		foreach my $message (@error_messages) {
+			carp $message;
+		}
+
+		if (@pkg_candidates > 1)
 		{
-			croak '*** can not find package for any of ('.join(', ',@pkgs).")\n"
+			my $list = join ', ', @pkg_candidates;
+			croak "*** can not find package for any of ($list)\n"
 			    . "*** check that one of them is properly installed and available in PKG_CONFIG_PATH\n";
 		}
 		else
 		{
-			croak "*** can not find package $pkgs[0]\n"
+			croak "*** can not find package $pkg_candidates[0]\n"
 			    . "*** check that it is properly installed and available in PKG_CONFIG_PATH\n";
 		}
 	}
 
-	$data{pkg} = $pkg;
+	# return the data of the package that was found first
+	my %data = ();
+	$data{pkg} = $pkgs_found[0];
 	foreach my $what (qw/modversion cflags libs/) {
-		$data{$what} = `pkg-config --$what \"$pkg\"`;
+		$data{$what} = `pkg-config --$what \"$data{pkg}\"`;
                 $data{$what} =~ s/[\015\012]+$//;
-		croak "*** can't find $what for \"$pkg\"\n"
+		croak "*** can't find $what for \"$data{pkg}\"\n"
 		    . "*** is it properly installed and available in PKG_CONFIG_PATH?\n"
 			unless $data{$what};
 	}
@@ -185,11 +208,19 @@ ExtUtils::PkgConfig - simplistic interface to pkg-config
 
  $cflags = ExtUtils::PkgConfig->cflags($package);
 
- $lib_only_L = ExtUtils::PkgConfig->libs_only_L($package);
+ $cflags_only_I = ExtUtils::PkgConfig->cflags_only_I($package);
 
- $lib_only_l = ExtUtils::PkgConfig->libs_only_l($package);
+ $cflags_only_other = ExtUtils::PkgConfig->cflags_only_other($package);
 
- $var_value = ExtUtils::PkgConfig->variable($package,$var);
+ $libs_only_L = ExtUtils::PkgConfig->libs_only_L($package);
+
+ $libs_only_l = ExtUtils::PkgConfig->libs_only_l($package);
+
+ $libs_only_other = ExtUtils::PkgConfig->libs_only_other($package);
+
+ $static_libs = ExtUtils::PkgConfig->static_libs($package);
+
+ $var_value = ExtUtils::PkgConfig->variable($package, $var);
 
  if (ExtUtils::PkgConfig->atleast_version($package,$version)) {
     ...
