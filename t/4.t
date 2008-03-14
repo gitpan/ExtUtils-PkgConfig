@@ -1,11 +1,11 @@
 #
-# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/4.t,v 1.3 2008/01/20 21:05:17 kaffeetisch Exp $
+# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/4.t,v 1.4 2008/03/14 23:28:25 kaffeetisch Exp $
 #
 
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 20;
 use ExtUtils::PkgConfig;
 
 require 't/swallow_stderr.inc';
@@ -57,8 +57,8 @@ ok (contains ($macros, 'TEST_MAJOR_VERSION'));
 ok (contains ($macros, 'TEST_MINOR_VERSION'));
 ok (contains ($macros, 'TEST_MICRO_VERSION'));
 ok (contains ($macros, 'TEST_CHECK_VERSION'));
-ok (close $fh);
-ok (unlink $header);
+close $fh;
+unlink $header;
 
 swallow_stderr (sub {
 	eval {

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/2.t,v 1.3 2008/02/09 19:31:16 kaffeetisch Exp $
+# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/2.t,v 1.4 2008/03/14 23:28:25 kaffeetisch Exp $
 #
 
 use strict;
@@ -31,7 +31,7 @@ SKIP: {
 
 SKIP: {
   skip 'static libs', 1
-    unless ($major > 0 || $minor >= 18);
+    unless ($major > 0 || $minor >= 20);
 
   my $data = ExtUtils::PkgConfig->static_libs(qw/test_glib-2.0/);
   like ($data, qr/pthread/);
