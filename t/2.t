@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Header: /cvsroot/gtk2-perl/gtk2-perl-xs/ExtUtils-PkgConfig/t/2.t,v 1.4 2008/03/14 23:28:25 kaffeetisch Exp $
+# $Id: 2.t,v 1.5 2008/10/05 12:49:32 kaffeetisch Exp $
 #
 
 use strict;
