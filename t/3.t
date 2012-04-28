@@ -1,5 +1,5 @@
 #
-# $Id: 3.t,v 1.3 2008/10/19 11:54:45 kaffeetisch Exp $
+# $Id$
 #
 
 use strict;

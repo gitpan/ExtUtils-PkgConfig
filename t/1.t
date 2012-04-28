@@ -1,5 +1,5 @@
 #
-# $Id: 1.t,v 1.4 2008/10/05 12:49:32 kaffeetisch Exp $
+# $Id$
 #
 
 use strict;
@@ -13,6 +13,9 @@ BEGIN { use_ok('ExtUtils::PkgConfig') };
 require 't/swallow_stderr.inc';
 
 #########################
+
+my ($major, $minor) = split /\./, `pkg-config --version`;
+diag ("Testing against pkg-config $major.$minor");
 
 $ENV{PKG_CONFIG_PATH} = './t/';
 

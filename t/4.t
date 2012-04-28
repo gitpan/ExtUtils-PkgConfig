@@ -1,11 +1,11 @@
 #
-# $Id: 4.t,v 1.5 2008/10/05 12:49:32 kaffeetisch Exp $
+# $Id$
 #
 
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 24;
 use ExtUtils::PkgConfig;
 
 require 't/swallow_stderr.inc';
@@ -30,6 +30,13 @@ $macros = ExtUtils::PkgConfig->create_version_macros (qw/test_non_numeric/, 'TES
 ok (contains ($macros, 'TEST_MAJOR_VERSION (2)'));
 ok (contains ($macros, 'TEST_MINOR_VERSION (0)'));
 ok (contains ($macros, 'TEST_MICRO_VERSION (4)'));
+ok (contains ($macros, 'TEST_CHECK_VERSION'));
+
+# Check that '2' is turned into 2.0.0
+$macros = ExtUtils::PkgConfig->create_version_macros (qw/test_short/, 'TEST');
+ok (contains ($macros, 'TEST_MAJOR_VERSION (2)'));
+ok (contains ($macros, 'TEST_MINOR_VERSION (0)'));
+ok (contains ($macros, 'TEST_MICRO_VERSION (0)'));
 ok (contains ($macros, 'TEST_CHECK_VERSION'));
 
 swallow_stderr (sub {

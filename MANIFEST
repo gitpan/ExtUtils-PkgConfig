@@ -3,6 +3,7 @@ lib/ExtUtils/PkgConfig.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
+perl-ExtUtils-PkgConfig.doap
 perl-ExtUtils-PkgConfig.spec.in
 README
 t/1.t
@@ -12,4 +13,6 @@ t/4.t
 t/swallow_stderr.inc
 t/test_glib-2.0.pc
 t/test_non_numeric.pc
-META.yml                                 Module meta-data (added by MakeMaker)
+t/test_short.pc
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

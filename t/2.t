@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: 2.t,v 1.5 2008/10/05 12:49:32 kaffeetisch Exp $
+# $Id$
 #
 
 use strict;
@@ -12,7 +12,6 @@ use ExtUtils::PkgConfig;
 $ENV{PKG_CONFIG_PATH} = './t/';
 
 my ($major, $minor) = split /\./, `pkg-config --version`; # Ignore micro part
-diag ("Testing pkg-config $major.$minor");
 
 cmd_ok ('modversion');
 cmd_ok ('cflags');
