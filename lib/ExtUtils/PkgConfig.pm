@@ -24,7 +24,7 @@ use English qw(-no_match_vars); # avoid regex performance penalty
 
 use vars qw/ $VERSION $AUTOLOAD/;
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 
 sub import {
 	my $class = shift;
@@ -129,7 +129,7 @@ sub find {
                 $data{$what} =~ s/[\015\012]+$//;
 		croak "*** can't find $what for \"$data{pkg}\"\n"
 		    . "*** is it properly installed and available in PKG_CONFIG_PATH?\n"
-			unless $data{$what};
+			unless defined $data{$what};
 	}
 	return %data;
 }

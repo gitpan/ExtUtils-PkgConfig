@@ -4,7 +4,7 @@
       "gtk2-perl Team <gtk-perl-list at gnome dot org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "ExtUtils::MakeMaker version 6.64, CPAN::Meta::Converter version 2.112621",
+   "generated_by" : "ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "lgpl_2_1"
    ],
@@ -36,5 +36,5 @@
       },
       "x_MailingList" : "https://mail.gnome.org/mailman/listinfo/gtk-perl-list"
    },
-   "version" : "1.14"
+   "version" : "1.15"
 }
